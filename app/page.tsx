@@ -67,7 +67,7 @@ export default function Page() {
   return (
     <div className="relative flex flex-col items-center justify-center min-h-screen bg-black text-white p-4 overflow-hidden">
       <AlatarParticles />
-      <div className="absolute bottom-[5vh] sm:bottom-[10vh] text-center z-10 w-full max-w-[90vw] sm:max-w-md px-4">
+      <div className="absolute bottom-[5vh] pb-10 sm:bottom-[10vh] text-center z-10 w-full max-w-[90vw] sm:max-w-md px-4">
         {!showForm ? (
           <button
             onClick={() => {
