@@ -230,7 +230,7 @@ export default function Component() {
           </GlitchText>{" "}
           <span>interactive</span>
           <span className="transition-colors duration-300"> particle system</span> <br />
-          <a href="#" className="text-gray-500 text-xs mt-2.5 inline-block" target="_blank" rel="noreferrer">
+          <a href="#" className="pb-10 text-gray-500 text-xs mt-2.5 inline-block" target="_blank" rel="noreferrer">
             (explore more effects)
           </a>
           <style>{`
