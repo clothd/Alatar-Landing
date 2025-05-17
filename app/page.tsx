@@ -8,6 +8,7 @@ export default function Page() {
   const [email, setEmail] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -20,42 +21,53 @@ export default function Page() {
     event.preventDefault();
     setSuccessMessage('');
     setErrorMessage('');
+    setIsSubmitting(true);
 
-    // Simulate API call
     try {
-      // Simulate a delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Basic email validation (can be more complex)
+      // Basic email validation
       if (!email || !/\S+@\S+\.\S+/.test(email)) {
         throw new Error('Please enter a valid email address.');
       }
 
-      // Simulate success
-      console.log("Form submitted with email:", email);
-      setSuccessMessage('Successfully joined the waitlist!');
+      // Call the API endpoint
+      const response = await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'An unexpected error occurred');
+      }
+      
+      setSuccessMessage(data.message);
       setEmail(''); // Clear email input on success
-      // setShowForm(false); // Optionally hide form after submission
+      
       setTimeout(() => {
         setSuccessMessage('');
         setShowForm(false); // Hide form after message display
-      }, 3000); // Hide message and form after 3 seconds
+      }, 3000);
 
     } catch (error: any) {
-      // Simulate error
       console.error("Form submission error:", error.message);
       setErrorMessage(error.message || 'An unexpected error occurred. Please try again.');
       setTimeout(() => {
         setErrorMessage('');
         setShowForm(false); // Hide form after message display
-      }, 3000); // Hide message and form after 3 seconds
+      }, 3000);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white p-4">
+    <div className="relative flex flex-col items-center justify-center min-h-screen bg-black text-white p-4 overflow-hidden">
       <AlatarParticles />
-      <div className="absolute bottom-[55px] text-center z-10 w-full max-w-xs px-4">
+      <div className="absolute bottom-[5vh] sm:bottom-[10vh] text-center z-10 w-full max-w-[90vw] sm:max-w-md px-4">
         {!showForm ? (
           <button
             onClick={() => {
@@ -63,32 +75,40 @@ export default function Page() {
               setSuccessMessage('');
               setErrorMessage('');
             }}
-            className="text-gray-500 text-xs hover:text-gray-300 transition-colors duration-150 ease-in-out bg-transparent border-none p-0 m-0 cursor-pointer"
+            className="text-gray-500 text-sm sm:text-base hover:text-gray-300 transition-colors duration-150 ease-in-out bg-transparent border-none p-0 m-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 rounded"
+            aria-label="Join waitlist"
           >
             <GlitchText>[Join Waitlist]</GlitchText>
           </button>
         ) : (
-          <div className="flex flex-col items-center w-full">
+          <div className="flex flex-col items-center w-full space-y-2">
             {successMessage ? (
-              <p className="text-xs text-green-500 mt-1">{successMessage}</p>
+              <p className="text-sm sm:text-base text-green-500 mt-1 animate-fade-in">{successMessage}</p>
             ) : errorMessage ? (
-              <p className="text-xs text-red-500 mt-1">{errorMessage}</p>
+              <p className="text-sm sm:text-base text-red-500 mt-1 animate-fade-in">{errorMessage}</p>
             ) : (
-              <form onSubmit={handleFormSubmit} className="flex items-center space-x-2 mb-2">
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="text-xs bg-transparent text-gray-500 placeholder-gray-600 border-0 border-b border-gray-700 focus:outline-none focus:ring-0 focus:border-gray-300 py-1 px-0 w-40 sm:w-48"
-                  aria-label="Email for waitlist"
-                  required
-                />
+              <form 
+                onSubmit={handleFormSubmit} 
+                className="flex flex-col sm:flex-row items-center gap-3 w-full max-w-xs sm:max-w-md"
+              >
+                <div className="w-full">
+                  <input
+                    type="email"
+                    placeholder="Enter your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full text-sm sm:text-base bg-transparent text-gray-500 placeholder-gray-600 border-0 border-b border-gray-700 focus:outline-none focus:ring-0 focus:border-gray-300 py-2 px-0 transition-colors duration-150"
+                    aria-label="Email for waitlist"
+                    required
+                    disabled={isSubmitting}
+                  />
+                </div>
                 <button
                   type="submit"
-                  className="text-xs text-gray-500 hover:text-gray-300 transition-colors duration-150 ease-in-out bg-transparent border-0 border-b border-gray-700 focus:outline-none focus:ring-0 focus:border-gray-300 py-1 px-2"
+                  className="w-full sm:w-auto text-sm sm:text-base text-gray-500 hover:text-gray-300 transition-colors duration-150 ease-in-out bg-transparent border-0 border-b border-gray-700 focus:outline-none focus:ring-0 focus:border-gray-300 py-2 px-4 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={isSubmitting}
                 >
-                  Submit
+                  {isSubmitting ? 'Submitting...' : 'Submit'}
                 </button>
               </form>
             )}
